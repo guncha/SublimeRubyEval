@@ -6,14 +6,8 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
 
   def run(self, edit):
     view = self.view
-    region = sublime.Region(0, view.size())
-    text = view.substr(region)
-
-    settings = self.view.settings().get('ruby_eval')
-    gem_home = os.system('echo $GEM_HOME')
-    rcodetools = os.system('ls $GEM_HOME/gems | grep rcodetools')
-
-    s = subprocess.Popen(      
+    selection = view.sel()    
+    process = subprocess.Popen(
       [
         '/usr/bin/env',
         'ruby',
@@ -22,18 +16,28 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
       stdin=subprocess.PIPE,
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
+    
+    if len(selection) == 1 and selection[0].size() == 0:
+      selection = [sublime.Region(0, view.size())]
 
-    out = s.communicate(text)
+    for region in selection:
+      text = view.substr(region)
+      output = process.communicate(text)
 
-    if s.returncode != None and s.returncode != 0:
-      sublime.message_dialog("There was an error: " + out[1])
-      return
+      if process.returncode != None and process.returncode != 0:
+        sublime.message_dialog("There was an error: " + output[1])
+        return
 
-    viewlines = view.lines(region)
-    viewlines.reverse()
-    outlines = out[0].split('\n')
-    outlines.reverse()
-    max_range = len(viewlines)
+      view_lines = view.lines(region)
+      output_lines = output[0].split('\n')
+      region_length = len(view_lines)
 
-    for i in range(0, max_range):
-      view.replace(edit, viewlines[i], outlines[i+1])
+      if len(output_lines) > region_length:
+        output_lines[region_length - 1] = "\n".join(output_lines[region_length - 1:-1])
+        output_lines = output_lines[0:region_length]
+
+      view_lines.reverse()
+      output_lines.reverse()
+
+      for i in range(len(output_lines)):
+        view.replace(edit, view_lines[i], output_lines[i])
