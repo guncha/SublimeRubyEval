@@ -1,81 +1,39 @@
-import subprocess
-import sublime, sublime_plugin
+import os, sublime, sublime_plugin, subprocess
 
-class EvalAsRuby:
-    def ruby(self):
-        try:
-            return self.view.settings().get("ruby_eval").get("ruby")
-        except AttributeError:
-            return "ruby"
+class RubyEvalCommand(sublime_plugin.TextCommand):
 
-    def eval_as_ruby(self, script):
-        proc = subprocess.Popen(self.ruby(),
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 stdin=subprocess.PIPE)
+  PACKAGE_PATH = os.path.dirname(os.path.abspath(__file__))
 
-        ruby_input = u"""
-            require 'stringio'
+  def run(self, edit):
+    view = self.view
+    region = sublime.Region(0, view.size())
+    text = view.substr(region)
 
-            io = StringIO.new
-            begin
-              $stdout = $stderr = io
-              result = (lambda {
-                %s
-              }).call
-            ensure
-              $stdout = STDOUT
-              $stderr = STDERR
-            end
+    settings = self.view.settings().get('ruby_eval')
+    gem_home = os.system('echo $GEM_HOME')
+    rcodetools = os.system('ls $GEM_HOME/gems | grep rcodetools')
 
-            if io.string.empty?
-              case result
-              when String
-                print result
-              else
-                print result.inspect
-              end
-            else
-              print io.string
-            end
-        """ % script
+    s = subprocess.Popen(      
+      [
+        '/usr/bin/env',
+        'ruby',
+        os.path.join(self.PACKAGE_PATH,'bin','xmpfilter')
+      ],
+      stdin=subprocess.PIPE,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE)
 
-        output, error = proc.communicate(ruby_input.encode('utf-8'))
-        output = output.strip()
+    out = s.communicate(text)
 
-        if proc.poll():
-            output += "\n" + error
+    if s.returncode != None and s.returncode != 0:
+      sublime.message_dialog("There was an error: " + out[1])
+      return
 
-        return unicode(output ,encoding='utf-8')
+    viewlines = view.lines(region)
+    viewlines.reverse()
+    outlines = out[0].split('\n')
+    outlines.reverse()
+    max_range = len(viewlines)
 
-class RubyEvalCommand(sublime_plugin.TextCommand, EvalAsRuby):
-    def run(self, edit, output_to_editor=True):
-        for region in self.view.sel():
-            if region.a == region.b:
-                # eval line
-                region_of_line = self.view.line(region)
-                script = self.view.substr(region_of_line)
-                output = self.eval_as_ruby(script)
-                if output_to_editor:
-                    self.insert_output(output, region, edit, region_of_line.b, "\n")
-                else:
-                    pass # TODO
-            else:
-                # eval selected
-                script = self.view.substr(region)
-                output = self.eval_as_ruby(script)
-                start = max(region.a, region.b)
-                space = "" if script[-1] == "\n" else " "
-                if output_to_editor:
-                    self.insert_output(output, region, edit, start, space)
-                else:
-                    pass # TODO
-
-    def insert_output(self, output, region, edit, start, space):
-        self.view.insert(edit, start, space + output)
-        self.view.sel().subtract(region)
-        len_of_space = len(space)
-        self.view.sel().add(
-          sublime.Region(
-            start + len_of_space,
-            start + len_of_space + len(output.replace("\n", ''))))
+    for i in range(0, max_range):
+      view.replace(edit, viewlines[i], outlines[i+1])

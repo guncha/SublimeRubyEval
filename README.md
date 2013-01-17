@@ -1,7 +1,7 @@
 RubyEval
 ========
 
-Evaluate the selection in Ruby and print the result.
+Evaluate the current file in Ruby and replace each instance of `# =>` with that lines resulting output.
 
 ## Installation
 
@@ -12,20 +12,4 @@ $ git clone https://github.com/kevinthompson/SublimeRubyEval.git RubyEval
 
 ## Usage
 
-The `ruby_eval` command is binded to `super+k, super+e`.
-
-## Customize
-
-In your Preferences.sublime-settings:
-
-``` json
-{
-  // ...
-  "ruby_eval": {
-    "ruby": "~/.rbenv/versions/2.0.0-dev/bin/ruby"
-  }
-  // ...
-}
-```
-
-The Default is `ruby`.
+By default, the `ruby_eval` command is bound to `super+k, super +e`.
