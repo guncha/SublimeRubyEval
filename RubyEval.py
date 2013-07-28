@@ -5,12 +5,12 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
   PACKAGE_PATH = os.path.dirname(os.path.abspath(__file__))
 
   def run(self, edit):
+    self.settings = sublime.load_settings('RubyEval.sublime-settings')
     view = self.view
     selection = view.sel()
     process = subprocess.Popen(
       [
-        '/usr/bin/env',
-        'ruby',
+        self.settings.get("ruby"),
         os.path.join(self.PACKAGE_PATH,'bin','xmpfilter'),
         "--no-warnings"
       ],
