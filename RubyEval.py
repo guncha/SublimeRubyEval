@@ -6,17 +6,18 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
 
   def run(self, edit):
     view = self.view
-    selection = view.sel()    
+    selection = view.sel()
     process = subprocess.Popen(
       [
         '/usr/bin/env',
         'ruby',
-        os.path.join(self.PACKAGE_PATH,'bin','xmpfilter')
+        os.path.join(self.PACKAGE_PATH,'bin','xmpfilter'),
+        "--no-warnings"
       ],
       stdin=subprocess.PIPE,
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
-    
+
     if len(selection) == 1 and selection[0].size() == 0:
       selection = [sublime.Region(0, view.size())]
 
