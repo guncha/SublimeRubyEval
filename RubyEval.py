@@ -1,4 +1,4 @@
-import os, sublime, sublime_plugin, subprocess
+import os, sublime, sublime_plugin, subprocess, re
 
 class RubyEvalCommand(sublime_plugin.TextCommand):
 
@@ -23,6 +23,10 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
 
     for region in selection:
       text = view.substr(region)
+
+      if not self.has_trailing_eval_mark(text):
+        text = self.add_trailing_eval_mark(text)
+
       output = process.communicate(text)
 
       if process.returncode != None and process.returncode != 0:
@@ -42,3 +46,9 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
 
       for i in range(len(output_lines)):
         view.replace(edit, view_lines[i], output_lines[i])
+
+  def has_trailing_eval_mark(self, text):
+    return re.search(r'#\s?=>.*\Z', text.strip())
+
+  def add_trailing_eval_mark(self, text):
+    return text.strip() + "\n# => "
