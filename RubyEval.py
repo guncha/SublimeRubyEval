@@ -4,6 +4,8 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
 
   PACKAGE_PATH = os.path.dirname(os.path.abspath(__file__))
 
+  ENCODING = 'utf-8'
+
   def run(self, edit):
     self.settings = sublime.load_settings('RubyEval.sublime-settings')
     view = self.view
@@ -27,14 +29,14 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
       if not self.has_trailing_eval_mark(text):
         text = self.add_trailing_eval_mark(text)
 
-      output = process.communicate(text)
+      output = process.communicate(text.encode(self.ENCODING))
 
       if process.returncode != None and process.returncode != 0:
         sublime.message_dialog("There was an error: " + output[1])
         return
 
       view_lines = view.lines(region)
-      output_lines = output[0].split('\n')
+      output_lines = output[0].decode(self.ENCODING).split('\n')
       region_length = len(view_lines)
 
       if len(output_lines) > region_length:
