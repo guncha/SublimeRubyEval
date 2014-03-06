@@ -4,9 +4,11 @@ Evaluate the current file in Ruby and replace each instance of `# =>` with that 
 
 ## Installation
 ``` bash
-cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
+cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages
 git clone https://github.com/kevinthompson/SublimeRubyEval.git RubyEval
 ```
+
+You may need to update the path to your Ruby executable. Edit the `RubyEval.sublime-settings` file in the `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/RubyEval` folder, and change `/usr/local/opt/rbenv/shims/ruby` to whatever the output of running `which ruby` in your console is (or to the path of your preferred Ruby executable, if different).
 
 ## Usage
 RubyEval will evaluate either your entire file, or the selected region, and will replace any instance of `# =>` with its evaluated result. Simply add `# =>` to the end of each line that you'd like to display the evaluated result of, then optionally select the region to parse, and execute the `ruby_eval` command using your assigned hotkey, or through Sublime Text 2's command pallette.
