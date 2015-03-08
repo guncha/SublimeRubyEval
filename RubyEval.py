@@ -6,13 +6,18 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
 
   ENCODING = 'utf-8'
 
+  def ruby(self):
+      try:
+          return self.view.settings().get("ruby_eval").get("ruby")
+      except AttributeError:
+          return "ruby"
+
   def run(self, edit):
-    self.settings = sublime.load_settings('RubyEval.sublime-settings')
     view = self.view
     selection = view.sel()
     process = subprocess.Popen(
       [
-        self.settings.get("ruby"),
+        self.ruby(),
         os.path.join(self.PACKAGE_PATH,'bin','xmpfilter'),
         "--no-warnings"
       ],
@@ -29,14 +34,14 @@ class RubyEvalCommand(sublime_plugin.TextCommand):
       if not self.has_trailing_eval_mark(text):
         text = self.add_trailing_eval_mark(text)
 
-      output = process.communicate(text.encode(self.ENCODING))
+      (stdout, stderr) = process.communicate(text.encode(self.ENCODING))
 
       if process.returncode != None and process.returncode != 0:
-        sublime.message_dialog("There was an error: " + output[1])
+        sublime.message_dialog("There was an error: " + str(stderr))
         return
 
       view_lines = view.lines(region)
-      output_lines = output[0].decode(self.ENCODING).split('\n')
+      output_lines = stdout.decode(self.ENCODING).split('\n')
       region_length = len(view_lines)
 
       if len(output_lines) > region_length:

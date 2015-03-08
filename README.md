@@ -3,15 +3,11 @@ RubyEval
 Evaluate the current file in Ruby and replace each instance of `# =>` with that lines resulting output.
 
 ## Installation
-``` bash
-cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages
-git clone https://github.com/kevinthompson/SublimeRubyEval.git RubyEval
-```
-
-You may need to update the path to your Ruby executable. Edit the `RubyEval.sublime-settings` file in the `~/Library/Application\ Support/Sublime\ Text\ 3/Packages/RubyEval` folder, and change `/usr/local/opt/rbenv/shims/ruby` to whatever the output of running `which ruby` in your console is (or to the path of your preferred Ruby executable, if different).
+1. Clone this repo to `~/Library/Application\ Support/Sublime\ Text\ 3/Packages`
+2. Restart SublimeText
 
 ## Usage
-RubyEval will evaluate either your entire file, or the selected region, and will replace any instance of `# =>` with its evaluated result. Simply add `# =>` to the end of each line that you'd like to display the evaluated result of, then optionally select the region to parse, and execute the `ruby_eval` command using your assigned hotkey, or through Sublime Text 2's command pallette.
+RubyEval will evaluate either your entire file, or the selected region, and will replace any instance of `# =>` with its evaluated result. Simply add `# =>` to the end of each line that you'd like to display the evaluated result of, then optionally select the region to parse, and execute the `ruby_eval` command using your assigned hotkey, or through Sublime Text 3's command pallette.
 
 By default, the `ruby_eval` command is bound to `super+k, super +e`.
 
@@ -28,7 +24,7 @@ class Person
 end
 
 p = Person.new('Kevin')
-p.name # => 
+p.name # =>
 p.age # =>
 ```
 
@@ -44,7 +40,7 @@ end
 
 p = Person.new('Kevin')
 p.name # => "Kevin"
-p.age # => 
+p.age # =>
 # ~> -:11: undefined method `age' for #<Person:0x10ecef310 @name="Kevin"> (NoMethodError)
 ```
 
